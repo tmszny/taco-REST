@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Aplikacja Cloud</title>
+    <link th:insert="~{fragments/navbar :: style}"/>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+
+</head>
+
+<body>
+<div th:insert="~{fragments/navbar :: navbar}">  </div>
+<h1>Witaj w...</h1>
+<img th:src="@{/images/andrzej.png}" />
+<button id="login_button" onclick="redirectToDesign()">START</button><br />
+<script>
+        function redirectToDesign() {
+            window.location.href = '/design';
+        }
+    </script>
+</body>
+
+</html>
