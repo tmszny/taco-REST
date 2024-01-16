@@ -2,7 +2,13 @@ package tms.cloud.web;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -13,77 +19,45 @@ import tms.cloud.Order;
 import tms.cloud.Taco;
 import tms.cloud.data.IngredientRepository;
 import tms.cloud.data.TacoRepository;
+import tms.cloud.web.api.TacoResource;
+import tms.cloud.web.api.TacoResourceAssembler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Controller
-@RequestMapping("/design")
+@RestController
+@RequestMapping(value = "/design", produces = "application/json")
 @SessionAttributes("order")
 public class DesignTacoController {
 
-    private final IngredientRepository ingredientRepository;
     private TacoRepository tacoRepo;
-
-    @ModelAttribute (name = "order")
-    public Order order() {
-        return new Order();
-    }
-
-    @ModelAttribute (name = "design")
-    public Taco taco() {
-        return new Taco();
-    }
+    @Autowired
+    private TacoResourceAssembler tacoResourceAssembler;
 
     @Autowired
-    public DesignTacoController(IngredientRepository ingredientRepository, TacoRepository tacoRepo) {
-        this.tacoRepo = tacoRepo;
-        this.ingredientRepository = ingredientRepository;
+    public DesignTacoController(TacoRepository tacoRepo) {this.tacoRepo = tacoRepo;}
+
+    @GetMapping("/recent")
+    public ResponseEntity<CollectionModel<TacoResource>> recentTaco() {
+        PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+        return new ResponseEntity<>(tacoResourceAssembler.toCollectionModel((tacoRepo.findAll(page))), HttpStatus.OK);
     }
 
-    @GetMapping
-    public String showDesignForm(Model model) {
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredientRepository.findAll().forEach(i -> ingredients.add(i));
-
-        Type[] types = Ingredient.Type.values();
-        for (Type type : types) {
-            model.addAttribute(type.toString().toLowerCase(),
-                    filterByType(ingredients, type));
+    @GetMapping("/{id}")
+    public ResponseEntity<TacoResource> tacoById(@PathVariable("id") Long id){
+        Optional<Taco> optTaco = tacoRepo.findById(id);
+        if (optTaco.isPresent()) {
+            return new ResponseEntity<>(tacoResourceAssembler.toModel(optTaco.get()), HttpStatus.OK);
         }
-        return "design";
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-        @PostMapping
-        public String processDesign (@ModelAttribute("design") @Valid Taco design, Errors errors, @ModelAttribute("order") Order order, Model model){
-
-            if (errors.hasErrors()) {
-                List<Ingredient> ingredients = new ArrayList<>();
-                ingredientRepository.findAll().forEach(i -> ingredients.add(i));
-
-                Type[] types = Ingredient.Type.values();
-                for (Type type : types) {
-                    model.addAttribute(type.toString().toLowerCase(),
-                            filterByType(ingredients, type));
-                }
-
-
-                model.addAttribute("design", design);
-                return "design";
-            }
-            Taco saved = tacoRepo.save(design);
-            order.addDesign(saved);
-            log.info("Przetwarzanie projektu taco: " + design);
-            return "redirect:/orders/current";
-        }
-
-    private List<Ingredient> filterByType(
-            List<Ingredient> ingredients, Type type) {
-        return ingredients
-                .stream()
-                .filter(x -> x.getType().equals(type))
-                .collect(Collectors.toList());
+    @PostMapping(consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Taco postTaco(@RequestBody Taco taco) {
+        return tacoRepo.save(taco);
     }
 }

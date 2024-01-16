@@ -6,7 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tms.cloud.data.IngredientRepository;
+import tms.cloud.data.TacoRepository;
 import tms.cloud.data.UserRepository;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 public class CloudApplication {
@@ -16,7 +21,7 @@ public class CloudApplication {
     }
 
     @Bean
-    public CommandLineRunner dataLoader(IngredientRepository repo, UserRepository userRepository, BCryptPasswordEncoder encoder) {
+    public CommandLineRunner dataLoader(IngredientRepository repo, UserRepository userRepository, BCryptPasswordEncoder encoder, TacoRepository tacoRepo) {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
@@ -33,6 +38,12 @@ public class CloudApplication {
 
                 userRepository.save(new User("user", encoder.encode("password")));
                 userRepository.save(new User("admin", encoder.encode("haslo")));
+
+                List<Ingredient> taco1 = Arrays.asList(new Ingredient("FLTO", "Flour Tortilla", Ingredient.Type.WRAP), new Ingredient("CHED", "Cheddar", Ingredient.Type.CHEESE));
+                List<Ingredient> taco2 = List.of(new Ingredient("COTO", "Corn Tortilla", Ingredient.Type.WRAP), new Ingredient("SLSA", "Salsa", Ingredient.Type.SAUCE));
+
+                tacoRepo.save(new Taco("taco1", taco1));
+                tacoRepo.save(new Taco("taco2", taco2));
             }
         };
     }

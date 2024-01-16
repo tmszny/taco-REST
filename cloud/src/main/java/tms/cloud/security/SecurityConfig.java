@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 .requestMatchers("/login","/images/**", "/login.css").permitAll()
                                 .requestMatchers("/", "/images/**", "/styles.css", "/fragments/header", "/navbar.css").permitAll()
                                 .requestMatchers("/register").permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().permitAll()) // do testowania API podmianka authenticated() -> permitAll()
                .formLogin(formLogin ->
                         formLogin
                                 .loginPage("/login")
