@@ -34,11 +34,12 @@ import java.util.stream.Collectors;
 public class DesignTacoController {
 
     private TacoRepository tacoRepo;
-    @Autowired
     private TacoResourceAssembler tacoResourceAssembler;
 
     @Autowired
-    public DesignTacoController(TacoRepository tacoRepo) {this.tacoRepo = tacoRepo;}
+    public DesignTacoController(TacoRepository tacoRepo, TacoResourceAssembler tacoResourceAssembler) {
+        this.tacoRepo = tacoRepo;
+        this.tacoResourceAssembler = tacoResourceAssembler;}
 
     @GetMapping("/recent")
     public ResponseEntity<CollectionModel<TacoResource>> recentTaco() {

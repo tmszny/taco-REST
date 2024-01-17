@@ -3,12 +3,14 @@ package tms.cloud.web.api;
 import lombok.Getter;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 import tms.cloud.Order;
 import tms.cloud.User;
 
 import java.util.Date;
 import java.util.List;
 
+@Relation(value = "order", collectionRelation = "orders")
 public class OrderResource extends RepresentationModel<OrderResource> {
     private TacoResourceAssembler tacoResourceAssembler;
     @Getter
