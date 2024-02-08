@@ -1,2 +1,1 @@
-# testykonsoli
-sprawdzanie pulla
+
